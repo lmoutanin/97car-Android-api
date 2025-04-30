@@ -1,0 +1,37 @@
+# Ignorer les fichiers de log
+*.log
+
+# Ignorer les fichiers de configuration IDE
+.idea/
+.vscode/
+
+# Ignorer les fichiers compilés
+*.class
+*.o
+*.out
+
+# Ignorer les répertoires de build
+/build
+/dist
+/target
+
+# Ignorer les fichiers temporaires
+*.tmp
+*.swp
+*.bak
+
+# Ignorer les fichiers générés par macOS
+.DS_Store
+
+# Ignorer les fichiers générés par Windows
+Thumbs.db
+
+# Ignorer les fichiers Python (si tu utilises Python)
+*.pyc
+__pycache__/
+
+# Ignorer les dépendances de Node.js (si tu utilises Node.js)
+node_modules/
+
+# Ignorer le dossier de la base de donnée qui est db_data
+db_data/
