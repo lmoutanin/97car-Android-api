@@ -1,5 +1,4 @@
 <?php
-
 require __DIR__ . '/../vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
@@ -14,8 +13,20 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 // Inclure les routes et les exécuter correctement
 $routes = require __DIR__ . '/../src/routes.php';
-$routes($app);  // 💡 Ici, on exécute la fonction qui enregistre les routes
+$routes($app); // 💡 Ici, on exécute la fonction qui enregistre les routes
 
+// Inclure le client et l'exécuter correctement
+$client = require __DIR__ . '/../src/Controller/client.php';
+$client($app); // 💡 Ici, on exécute la fonction qui enregistre les routes du client
+
+
+// Inclure le client et l'exécuter correctement
+$facture = require __DIR__ . '/../src/Controller/facture.php';
+$facture($app); // 💡 Ici, on exécute la fonction qui enregistre les routes de la facture
+
+
+
+// Middleware pour gérer les CORS
 $app->add(function (Request $request, RequestHandlerInterface $handler): Response {
     $response = $handler->handle($request);
     return $response

@@ -1,6 +1,9 @@
 <?php
 
-$host = 'database';  // Utilisez le nom du service Docker, pas 'localhost'
+// Déclarer la variable comme globale
+global $pdo;
+
+$host = 'database'; // Utilisez le nom du service Docker, pas 'localhost'
 $dbname = '97car';
 $user = 'postgres';
 $pass = 'admin';
