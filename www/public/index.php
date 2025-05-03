@@ -20,9 +20,15 @@ $client = require __DIR__ . '/../src/Controller/client.php';
 $client($app); // 💡 Ici, on exécute la fonction qui enregistre les routes du client
 
 
-// Inclure le client et l'exécuter correctement
+// Inclure la facture et exécuter correctement
 $facture = require __DIR__ . '/../src/Controller/facture.php';
 $facture($app); // 💡 Ici, on exécute la fonction qui enregistre les routes de la facture
+
+
+// Inclure la voiture et exécuter correctement
+$voiture = require __DIR__ . '/../src/Controller/voiture.php';
+$voiture($app); // 💡 Ici, on exécute la fonction qui enregistre les routes du voiture
+
 
 
 

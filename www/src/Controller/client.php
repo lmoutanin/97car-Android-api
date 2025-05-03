@@ -32,52 +32,38 @@ return function (App $app) {
     });
 
 
-    $app->post('/clients', function (Request $request, Response $response) use ($pdo) {
-        // Lire le corps de la requête
+    
+
+    $app->post('/clients', function (Request $request, Response $response) use ($pdo)  {
         $body = $request->getBody()->getContents();
         $data = json_decode($body, true);
-
-        // Vérifier si le JSON est valide
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $response->getBody()->write(json_encode(["error" => "JSON invalide"]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
-        // Vérifier la présence des champs obligatoires
-        if (!isset($data['nom']) || !isset($data['prenom'])) {
-            $response->getBody()->write(json_encode(["error" => "Données manquantes pour 'nom' ou 'prenom'"]));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
-        }
-
-        // Exécuter la requête SQL
         $stmt = $pdo->prepare("INSERT INTO client (nom, prenom, telephone, mel, adresse, code_postal, ville) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $data['nom'],
-            $data['prenom'],
-            $data['telephone'] ?? null,
-            $data['mel'] ?? null,
-            $data['adresse'] ?? null,
-            $data['code_postal'] ?? null,
-            $data['ville'] ?? null
-        ]);
-
+        $stmt->execute([$data['nom'],$data['prenom'],$data['telephone'] ?? null,$data['mel'] ?? null,$data['adresse'] ?? null,$data['code_postal'] ?? null,$data['ville'] ?? null]);
         $response->getBody()->write(json_encode(["message" => "Client ajouté"]));
-        return $response->withHeader('Content-Type', 'application/json')->withStatus(201);
+        return $response->withHeader('Content-Type', 'application/json');
     });
 
 
+    $app->put('/putclients/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
+        $id = $args['id'];
+        $data = $request->getParsedBody();
+        $requestBody = $request->getBody()->getContents();
+        $data = json_decode($requestBody, true);
+        $stmt = $pdo->prepare("UPDATE client SET nom = ?, prenom = ?, telephone = ? , mel = ? , adresse = ? ,code_postal = ? , ville = ? WHERE id_client = ?");
+        $stmt->execute([$data['nom'],$data['prenom'],$data['telephone'] ?? null ,$data['mel'] ?? null ,$data['adresse'] ?? null ,$data['code_postal'] ?? null ,$data['ville'] ?? null,$id]);
+        $response->getBody()->write(json_encode(["message" => "Client modifier"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+ 
 
+    
 
-
-
-
-
-
-
-
-
-
-
-
+    $app->delete('/dropclients/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
+        $id = $args['id'];
+        $stmt = $pdo->prepare("DELETE FROM client WHERE id_client = ?");
+        $stmt->execute([$id]);
+        $response->getBody()->write(json_encode(["message" => "Client supprimer"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
  
 };

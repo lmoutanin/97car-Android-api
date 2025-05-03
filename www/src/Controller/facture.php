@@ -33,13 +33,6 @@ return function (App $app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
-    $app->post('/factures', function (Request $request, Response $response) use ($pdo) {
-        $data = $request->getParsedBody();
-        $stmt = $pdo->prepare("INSERT INTO facture (id_client, id_voiture, montant, date) VALUES (?, ?, 0, ?)");
-        $stmt->execute([$data['id_client'], $data['id_voiture'], $data['date']]);
-        $response->getBody()->write(json_encode(["message" => "Facture ajoutée"]));
-        return $response->withHeader('Content-Type', 'application/json');
-    });
 
     $app->get('/factures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
         $id = $args['id'];
@@ -106,14 +99,35 @@ return function (App $app) {
 
 
 
+    $app->post('/factures', function (Request $request, Response $response) use ($pdo)  {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+        $stmt = $pdo->prepare("INSERT INTO facture (date,client_id,voiture_id,montant) VALUES (?, ?, ?,?)");
+        $stmt->execute([$data['date'],$data['client_id'],$data['voiture_id'] ?? null, $data['montant'] ?? null]);
+        $response->getBody()->write(json_encode(["message" => "Facture ajouté"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
 
 
+    $app->put('/putfactures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
+        $id = $args['id'];
+        $data = $request->getParsedBody();
+        $requestBody = $request->getBody()->getContents();
+        $data = json_decode($requestBody, true);
+        $stmt = $pdo->prepare("UPDATE facture SET date = ?, client_id = ?, voiture_id = ? , montant = ?  WHERE id_facture = ?");
+        $stmt->execute([$data['date'],$data['client_id'],$data['voiture_id'],$data['montant'],$id]);
+        $response->getBody()->write(json_encode(["message" => "Facture modifier"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
 
 
-    
+    $app->delete('/dropfactures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
+        $id = $args['id'];
+        $stmt = $pdo->prepare("DELETE FROM facture WHERE id_facture = ?");
+        $stmt->execute([$id]);
+        $response->getBody()->write(json_encode(["message" => "Facture supprimer"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
 
 
-
-
- 
 };
