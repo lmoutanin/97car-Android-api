@@ -12,26 +12,27 @@ return function (App $app) {
      // === FACTURES ===
      $app->get('/factures', function (Request $request, Response $response) use ($pdo) {
         $queryParams = $request->getQueryParams();
-
+    
         if (!isset($queryParams['client_id'])) {
-            return $response->withStatus(400)->withHeader('Content-Type', 'application/json')
-                ->getBody()->write(json_encode(["message" => "Paramètre client_id requis"]));
+            $response->getBody()->write(json_encode(["message" => "Paramètre client_id requis"]));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
-
+    
         $client_id = (int) $queryParams['client_id'];
-
+    
         $stmt = $pdo->prepare("SELECT * FROM facture WHERE client_id = ?");
         $stmt->execute([$client_id]);
         $factures = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    
         if (!$factures) {
-            return $response->withStatus(404)->withHeader('Content-Type', 'application/json')
-                ->getBody()->write(json_encode(["message" => "Aucune facture trouvée pour ce client"]));
+            $response->getBody()->write(json_encode(["message" => "Aucune facture trouvée pour ce client"]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }
-
+    
         $response->getBody()->write(json_encode($factures));
         return $response->withHeader('Content-Type', 'application/json');
     });
+    
 
 
     $app->get('/factures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
@@ -102,8 +103,19 @@ return function (App $app) {
     $app->post('/factures', function (Request $request, Response $response) use ($pdo)  {
         $body = $request->getBody()->getContents();
         $data = json_decode($body, true);
-        $stmt = $pdo->prepare("INSERT INTO facture (date,client_id,voiture_id,montant) VALUES (?, ?, ?,?)");
-        $stmt->execute([$data['date'],$data['client_id'],$data['voiture_id'] ?? null, $data['montant'] ?? null]);
+        $stmt = $pdo->prepare("INSERT INTO facture (date,client_id,voiture_id) VALUES (?, ?, ?)");
+        $stmt->execute([$data['date'],$data['client_id'],$data['voiture_id'] ?? null]);
+        $response->getBody()->write(json_encode(["message" => "Facture ajouté"]));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    $app->post('/factureCompletes', function (Request $request, Response $response) use ($pdo)  {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+        $stmt = $pdo->query("SELECT MAX(id_facture) as max_id FROM facture");
+        $maxId = $stmt->fetch(PDO::FETCH_ASSOC)['max_id'];
+        $stmt = $pdo->prepare("INSERT INTO facture_type_reparation (id_facture, id_reparation , quantite ) VALUES (?, ?, ?)");
+        $stmt->execute([ $maxId,$data['id_reparation'],$data['quantite']]);
         $response->getBody()->write(json_encode(["message" => "Facture ajouté"]));
         return $response->withHeader('Content-Type', 'application/json');
     });

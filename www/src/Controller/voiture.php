@@ -9,14 +9,29 @@ return function (App $app) {
 
     global $pdo;  // Déclarer que nous utilisons la variable globale $pdo
  
-    // === voitures ===
+    // === VOITURES ===   
     $app->get('/voitures', function (Request $request, Response $response) use ($pdo) {
-        $stmt = $pdo->query("SELECT * FROM voiture");
+        $queryParams = $request->getQueryParams();
+
+        if (!isset($queryParams['client_id'])) {
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json')
+                ->getBody()->write(json_encode(["message" => "Paramètre client_id requis"]));
+        }
+
+        $client_id = (int) $queryParams['client_id'];
+
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE client_id = ?");
+        $stmt->execute([$client_id]);
         $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$voitures) {
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json')
+                ->getBody()->write(json_encode(["message" => "Aucune facture trouvée pour ce client"]));
+        }
+
         $response->getBody()->write(json_encode($voitures));
         return $response->withHeader('Content-Type', 'application/json');
     });
-
 
      
     $app->get('/voitures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
