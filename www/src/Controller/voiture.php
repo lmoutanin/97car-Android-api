@@ -14,8 +14,8 @@ return function (App $app) {
         $queryParams = $request->getQueryParams();
 
         if (!isset($queryParams['client_id'])) {
-            return $response->withStatus(400)->withHeader('Content-Type', 'application/json')
-                ->getBody()->write(json_encode(["message" => "Paramètre client_id requis"]));
+            $response->getBody()->write(json_encode(["message" => "Paramètre client_id requis"]));
+            return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
         }
 
         $client_id = (int) $queryParams['client_id'];
@@ -25,8 +25,8 @@ return function (App $app) {
         $voitures = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (!$voitures) {
-            return $response->withStatus(404)->withHeader('Content-Type', 'application/json')
-                ->getBody()->write(json_encode(["message" => "Aucune facture trouvée pour ce client"]));
+            $response->getBody()->write(json_encode(["message" => "Aucune voiture trouvée pour ce client"]));
+            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
         }
 
         $response->getBody()->write(json_encode($voitures));
@@ -35,15 +35,76 @@ return function (App $app) {
 
      
     $app->get('/voitures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE id_voiture = ?");
-        $stmt->execute([$args['id']]);
-        $client = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$client) {
+        $id = $args['id'];
+
+        $stmt = $pdo->prepare("
+            SELECT 
+                id_voiture,annee,marque,modele,immatriculation,kilometrage,voiture.client_id,
+                client.nom , client.prenom,
+                facture.id_facture ,facture.date , facture.montant,
+                type_reparation.id_reparation,type_reparation.description , type_reparation.cout,
+                facture_type_reparation.quantite
+            FROM voiture
+            JOIN client ON voiture.client_id = client.id_client
+            LEFT JOIN facture ON voiture.id_voiture = facture.id_facture
+            LEFT JOIN facture_type_reparation ON facture.id_facture = facture_type_reparation.id_facture
+            LEFT JOIN type_reparation ON facture_type_reparation.id_reparation = type_reparation.id_reparation
+            WHERE voiture.id_voiture = ?
+        ");
+
+        $stmt->execute([$id]);
+        $voitureData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$voitureData) {
             return $response->withStatus(404)->withHeader('Content-Type', 'application/json')
-                ->getBody()->write(json_encode(["message" => "Client non trouvé"]));
+                ->getBody()->write(json_encode(["message" => "Voiture non trouvée"]));
         }
-        $response->getBody()->write(json_encode($client));
+
+        // Structurer la réponse
+        $voiture = [
+            "id_voiture" => $voitureData[0]["id_voiture"],
+            "annee" => $voitureData[0]["annee"],
+            "marque" => $voitureData[0]["marque"],
+            "modele" => $voitureData[0]["modele"],
+            "immatriculation" => $voitureData[0]["immatriculation"],
+            "kilometrage" => $voitureData[0]["kilometrage"],
+            "client" => [
+                "id_client" => $voitureData[0]['client_id'],
+                "nom" => $voitureData[0]['nom'],
+                "prenom" => $voitureData[0]['prenom']
+            ],
+            "factures" => [],
+            "reparations" =>[],
+        ];
+   
+       $tbFactureId = array();
+        foreach ($voitureData as $row){
+            if(!empty($row['id_facture'])) {
+                if(!in_array($row["id_facture"],$tbFactureId))
+                $voiture["factures"][] = [
+                    "id_facture" => $row["id_facture"],
+                    "date" => $row["date"],
+                    "montant" => $row["montant"]
+                ];
+                array_push($tbFactureId,$row["id_facture"]);
+            }
+        }
+
+        foreach ($voitureData as $row){
+            if(!empty($row['id_reparation'])) {
+                $voiture["reparations"][] = [
+                    "id_reparation" => $row["id_reparation"],
+                    "description" => $row["description"],
+                    "cout" => $row["cout"],
+                    "quantite" => $row["quantite"]
+                ];
+                 
+            }
+        }
+
+        $response->getBody()->write(json_encode($voiture));
         return $response->withHeader('Content-Type', 'application/json');
+
     });
 
 

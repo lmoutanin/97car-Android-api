@@ -39,20 +39,20 @@ return function (App $app) {
         $id = $args['id'];
 
         $stmt = $pdo->prepare("
-        SELECT 
-            f.id_facture AS facture_id, f.date AS date_facture, f.montant,
-            c.id_client, c.nom AS client_nom, c.prenom AS client_prenom, 
-            c.telephone AS client_telephone, c.mel AS client_email, 
-            c.adresse AS client_adresse, c.code_postal AS client_code_postal, c.ville AS client_ville,
-            v.id_voiture, v.marque, v.modele, v.annee, v.immatriculation, v.kilometrage,
-            tr.id_reparation, tr.description AS reparation_description, 
-            tr.cout AS reparation_cout, ftr.quantite AS reparation_quantite
-        FROM facture f
-        JOIN client c ON f.client_id = c.id_client 
-        JOIN voiture v ON f.voiture_id = v.id_voiture
-        LEFT JOIN facture_type_reparation ftr ON f.id_facture = ftr.id_facture
-        LEFT JOIN type_reparation tr ON ftr.id_reparation = tr.id_reparation
-        WHERE f.id_facture = ?
+            SELECT 
+                f.id_facture AS facture_id, f.date AS date_facture, f.montant,
+                c.id_client, c.nom AS client_nom, c.prenom AS client_prenom, 
+                c.telephone AS client_telephone, c.mel AS client_email, 
+                c.adresse AS client_adresse, c.code_postal AS client_code_postal, c.ville AS client_ville,
+                v.id_voiture, v.marque, v.modele, v.annee, v.immatriculation, v.kilometrage,
+                tr.id_reparation, tr.description AS reparation_description, 
+                tr.cout AS reparation_cout, ftr.quantite AS reparation_quantite
+            FROM facture f
+            JOIN client c ON f.client_id = c.id_client 
+            JOIN voiture v ON f.voiture_id = v.id_voiture
+            LEFT JOIN facture_type_reparation ftr ON f.id_facture = ftr.id_facture
+            LEFT JOIN type_reparation tr ON ftr.id_reparation = tr.id_reparation
+            WHERE f.id_facture = ?
         ");
 
         $stmt->execute([$id]);
