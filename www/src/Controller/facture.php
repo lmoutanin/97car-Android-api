@@ -109,18 +109,7 @@ return function (App $app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
-    $app->post('/factureCompletes', function (Request $request, Response $response) use ($pdo)  {
-        $body = $request->getBody()->getContents();
-        $data = json_decode($body, true);
-        $stmt = $pdo->query("SELECT MAX(id_facture) as max_id FROM facture");
-        $maxId = $stmt->fetch(PDO::FETCH_ASSOC)['max_id'];
-        $stmt = $pdo->prepare("INSERT INTO facture_type_reparation (id_facture, id_reparation , quantite ) VALUES (?, ?, ?)");
-        $stmt->execute([ $maxId,$data['id_reparation'],$data['quantite']]);
-        $response->getBody()->write(json_encode(["message" => "Facture ajouté"]));
-        return $response->withHeader('Content-Type', 'application/json');
-    });
-
-
+ 
     $app->put('/putfactures/{id}', function (Request $request, Response $response, array $args) use ($pdo) {
         $id = $args['id'];
         $data = $request->getParsedBody();

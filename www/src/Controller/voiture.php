@@ -46,7 +46,7 @@ return function (App $app) {
                 facture_type_reparation.quantite
             FROM voiture
             JOIN client ON voiture.client_id = client.id_client
-            LEFT JOIN facture ON voiture.id_voiture = facture.id_facture
+            LEFT JOIN facture ON voiture.id_voiture = facture.voiture_id
             LEFT JOIN facture_type_reparation ON facture.id_facture = facture_type_reparation.id_facture
             LEFT JOIN type_reparation ON facture_type_reparation.id_reparation = type_reparation.id_reparation
             WHERE voiture.id_voiture = ?
