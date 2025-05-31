@@ -1,4 +1,4 @@
-# 🌐 API REST – 97Car
+# 🌐 97car-Android-api
 
 Ceci est l’API backend du projet **97Car**, développée avec **Slim 4 (PHP)**.  
 Elle permet à l’application Slim Android de gérer les **clients**, **voitures** et **factures** via des requêtes HTTP en **JSON**.
@@ -29,8 +29,8 @@ Le backend utilise **PostgreSQL** et est entièrement conteneurisé avec **Docke
 ## ▶️ Lancer le projet
 
 ```bash
-git clone https://github.com/lmoutanin/API-97CAR.git
-cd API-97CAR
+git clone  https://github.com/lmoutanin/97car-Android-api.git
+cd 97car-Android-api
 docker-compose up -d
 ```
 
